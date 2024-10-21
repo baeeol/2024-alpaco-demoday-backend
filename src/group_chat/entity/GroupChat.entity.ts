@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import GroupChatMessage from "./GroupChatMessage.entity";
 
 @Entity("group_chat")
 export default class GroupChat {
@@ -10,6 +11,9 @@ export default class GroupChat {
 
   @Column("varchar", { length: 60, nullable: false })
   tag: string;
+
+  @OneToMany(() => GroupChatMessage, (groupChatMessage) => groupChatMessage.groupChat)
+  messages!: GroupChatMessage;
 
   constructor(name: string, tag: string) {
     this.name = name;

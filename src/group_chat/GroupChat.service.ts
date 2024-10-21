@@ -1,7 +1,8 @@
 import ServiceException from "@exception/Service.exception";
-import { AddingGroupChatDTO } from "./dto";
-import GroupChat from "./GroupChat.entity";
+import { AddingGroupChatDTO, AddingGroupChatMessageDTO } from "./dto";
+import GroupChat from "./entity/GroupChat.entity";
 import GroupChatRepository from "./GroupChat.repository";
+import GroupChatMessage from "./entity/GroupChatMessage.entity";
 
 class GroupChatService {
   private groupChatRepository = new GroupChatRepository();
@@ -53,6 +54,47 @@ class GroupChatService {
       });
 
       return allGroupChatList;
+    } catch (e) {
+      if (e instanceof ServiceException) {
+        throw e;
+      }
+
+      throw new ServiceException("server", `${e}`);
+    }
+  }
+
+  async findMessage(groupChatId: number) {
+    try {
+      const groupChatMessageEntityList =
+        await this.groupChatRepository.findGroupChatMessageByGroupChatId(groupChatId);
+
+      const groupChatMessageList = groupChatMessageEntityList.map(
+        (groupChatMessageEntity) => {
+          return groupChatMessageEntity.message;
+        }
+      );
+
+      return groupChatMessageList;
+    } catch (e) {
+      if (e instanceof ServiceException) {
+        throw e;
+      }
+
+      throw new ServiceException("server", `${e}`);
+    }
+  }
+
+  async addMessage(addingGroupChatMessageDTO: AddingGroupChatMessageDTO) {
+    try {
+      const { message, groupChatId } = addingGroupChatMessageDTO;
+
+      const groupChat = await this.groupChatRepository.findGroupChatById(groupChatId);
+      if (!groupChat) {
+        throw new ServiceException("client", "group chat does not exist.");
+      }
+
+      const groupChatMessage = new GroupChatMessage(message, groupChat);
+      await this.groupChatRepository.createMessage(groupChatMessage);
     } catch (e) {
       if (e instanceof ServiceException) {
         throw e;
