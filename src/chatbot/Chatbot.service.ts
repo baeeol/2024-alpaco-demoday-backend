@@ -4,14 +4,42 @@ import ServiceException from "@exception/Service.exception";
 import dotenv from "dotenv";
 dotenv.config();
 
+interface ChatCompletionMessageType {
+  role: "assistant";
+  content: string;
+}
+
 class ChatbotService {
   private openai: OpenAI = new OpenAI({ apiKey: process.env["OPENAI_KEY"] });
 
   async respondMessage(chatbotRequestDTO: ChatbotRequestDTO) {
     try {
-      const { message } = chatbotRequestDTO;
+      const { message, history } = chatbotRequestDTO;
+      const historyMessages: ChatCompletionMessageType[] = history.map((m) => {
+        return { role: "assistant", content: m };
+      });
+      console.log(
+        {
+          role: "system",
+          content:
+            "너는 항상 존댓말을 사용하고 다른 사람의 질문에 대해 좋은 대답을 해주기 위해 차근차근 생각하는 사람이야.",
+        },
+        ...historyMessages,
+        { role: "user", content: message }
+      );
       const chatCompletion = await this.openai.chat.completions.create({
-        messages: [{ role: "user", content: message }],
+        messages: [
+          {
+            role: "system",
+            content: "너는 다른 사람의 질문을 듣고 좋은 대답을 해주는 사람이야.",
+          },
+          {
+            role: "system",
+            content: "항상 존댓말을 사용하고 정확한 정보를 알려주기 위해 노력해줘.",
+          },
+          ...historyMessages,
+          { role: "user", content: message },
+        ],
         model: "gpt-3.5-turbo",
       });
 
