@@ -18,15 +18,6 @@ class ChatbotService {
       const historyMessages: ChatCompletionMessageType[] = history.map((m) => {
         return { role: "assistant", content: m };
       });
-      console.log(
-        {
-          role: "system",
-          content:
-            "너는 항상 존댓말을 사용하고 다른 사람의 질문에 대해 좋은 대답을 해주기 위해 차근차근 생각하는 사람이야.",
-        },
-        ...historyMessages,
-        { role: "user", content: message }
-      );
       const chatCompletion = await this.openai.chat.completions.create({
         messages: [
           {

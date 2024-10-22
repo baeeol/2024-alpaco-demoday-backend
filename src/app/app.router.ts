@@ -2,12 +2,14 @@ import { ControllerException, ServiceException } from "@exception";
 import { Router, Request, Response } from "express";
 import chatbotRouter from "src/chatbot/Chatbot.router";
 import groupChatRouter from "src/group_chat/GroupChat.router";
+import questionRouter from "src/question/Question.router";
 
 const appRouter = Router();
 
 // routing
 appRouter.use("/chatbot", chatbotRouter);
 appRouter.use("/group-chat", groupChatRouter);
+appRouter.use("/question", questionRouter);
 
 // error handling
 appRouter.use((err: object, req: Request, res: Response, next: Function) => {
