@@ -16,7 +16,7 @@ class UserService {
         throw new ServiceException("client", "nickname or password is wrong");
       }
 
-      return { id: sameNicknameUser.id, name: sameNicknameUser.name };
+      return sameNicknameUser.id;
     } catch (e) {
       if (e instanceof ServiceException) {
         throw e;
@@ -38,7 +38,6 @@ class UserService {
       const salt = bcrypt.genSaltSync();
       const digest = bcrypt.hashSync(password, salt);
       const newUser = new User(nickname, name, belongTo, age, digest, salt);
-      console.log(newUser);
 
       await this.userRepository.createUser(newUser);
     } catch (e) {
