@@ -4,8 +4,12 @@ import chatbotRouter from "src/chatbot/Chatbot.router";
 import groupChatRouter from "src/group_chat/GroupChat.router";
 import questionRouter from "src/question/Question.router";
 import userRouter from "src/user/User.router";
+import RequestHeaderPipe from "src/pipe/RequestHeader.pipe";
 
 const appRouter = Router();
+
+// pipe
+appRouter.use("/", RequestHeaderPipe);
 
 // routing
 appRouter.use("/chatbot", chatbotRouter);
@@ -24,7 +28,6 @@ appRouter.use((err: object, req: Request, res: Response, next: Function) => {
         break;
 
       default:
-        console.log(err);
         res.status(500).send("internal server error");
     }
     return;
