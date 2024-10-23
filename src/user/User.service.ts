@@ -28,7 +28,7 @@ class UserService {
 
   async register(registerDTO: RegisterDTO) {
     try {
-      const { nickname, name, password } = registerDTO;
+      const { nickname, name, belongTo, age, password } = registerDTO;
 
       const sameNicknameUser = await this.userRepository.findByNickname(nickname);
       if (sameNicknameUser) {
@@ -37,7 +37,7 @@ class UserService {
 
       const salt = bcrypt.genSaltSync();
       const digest = bcrypt.hashSync(password, salt);
-      const newUser = new User(nickname, name, digest, salt);
+      const newUser = new User(nickname, name, belongTo, age, digest, salt);
       console.log(newUser);
 
       await this.userRepository.createUser(newUser);
