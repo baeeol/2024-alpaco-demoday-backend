@@ -1,8 +1,9 @@
 import ServiceException from "@exception/Service.exception";
 import UserRepository from "./User.repository";
 import { LoginDTO, RegisterDTO } from "./dto";
-import User from "./User.entity";
+import User from "./entity/User.entity";
 import bcrypt from "bcrypt";
+import UserFeature from "./entity/UserFeature.entity";
 
 class UserService {
   private userRepository = new UserRepository();
@@ -28,7 +29,18 @@ class UserService {
 
   async register(registerDTO: RegisterDTO) {
     try {
-      const { nickname, name, belongTo, age, password } = registerDTO;
+      const {
+        nickname,
+        name,
+        belongTo,
+        age,
+        password,
+        MBTI,
+        interestPart,
+        strength,
+        favorite,
+        sentenceOfoneself,
+      } = registerDTO;
 
       const sameNicknameUser = await this.userRepository.findByNickname(nickname);
       if (sameNicknameUser) {
@@ -37,9 +49,18 @@ class UserService {
 
       const salt = bcrypt.genSaltSync();
       const digest = bcrypt.hashSync(password, salt);
-      const newUser = new User(nickname, name, belongTo, age, digest, salt);
 
-      await this.userRepository.createUser(newUser);
+      const newUser = new User(nickname, name, belongTo, age, digest, salt);
+      const newUserFeature = new UserFeature(
+        MBTI,
+        interestPart,
+        strength,
+        favorite,
+        sentenceOfoneself,
+        newUser
+      );
+
+      const a = await this.userRepository.createUser(newUser, newUserFeature);
     } catch (e) {
       if (e instanceof ServiceException) {
         throw e;

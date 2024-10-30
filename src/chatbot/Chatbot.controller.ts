@@ -7,10 +7,11 @@ class ChatbotController {
 
   async messageResponse(req: Request, res: Response, next: Function) {
     try {
-      const { message, history } = req.body;
+      const { message, history, userId } = req.body;
       const chatbotRequestDTO: ChatbotRequestDTO = new ChatbotRequestDTO(
         message,
-        history
+        history,
+        parseInt(userId)
       );
       const response = await this.ChatbotService.respondMessage(chatbotRequestDTO);
 

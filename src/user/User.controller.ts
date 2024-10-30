@@ -20,13 +20,21 @@ class UserController {
 
   async register(req: Request, res: Response, next: Function) {
     try {
-      const { nickname, name, belongTo, age, password } = req.body.registerData;
+      const { nickname, name, belongTo, age, password } =
+        req.body.registerData.accountData;
+      const { MBTI, interestPart, strength, favorite, sentenceOfoneself } =
+        req.body.registerData.featureData;
       const registerDTO = new RegisterDTO(
         nickname,
         name,
         belongTo,
         parseInt(age),
-        password
+        password,
+        MBTI,
+        interestPart,
+        strength,
+        favorite,
+        sentenceOfoneself
       );
 
       await this.userService.register(registerDTO);

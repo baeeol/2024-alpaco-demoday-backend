@@ -19,6 +19,8 @@ appRouter.use("/user", userRouter);
 
 // error handling
 appRouter.use((err: object, req: Request, res: Response, next: Function) => {
+  console.log(`server: error! ${err}`);
+
   if (err instanceof ControllerException) {
     res.status(400).send(err.message);
   } else if (err instanceof ServiceException) {
