@@ -1,10 +1,12 @@
 class AddingGroupChatMessageDTO {
   message: string;
-  groupChatId;
+  groupChatId: number;
+  userId: number;
 
-  constructor(message: string, groupChatId: number) {
+  constructor(message: string, groupChatId: number, userId: number) {
     this.groupChatId = groupChatId;
     this.message = message;
+    this.userId = userId;
   }
 }
 

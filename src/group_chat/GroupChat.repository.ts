@@ -18,11 +18,11 @@ class GroupChatRepository {
     return await this.groupChatRepository.findOne({ where: { id: id } });
   }
 
-  async findGroupChatMessageByGroupChatId(
+  async findMessageByChatIdJoinCommenter(
     groupChatId: number
   ): Promise<GroupChatMessage[]> {
     return await this.groupChatMessageRepository.find({
-      relations: { groupChat: true },
+      relations: { groupChat: true, commenter: true },
       where: { groupChat: { id: groupChatId } },
     });
   }

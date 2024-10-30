@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import Question from "./Question.entity";
+import User from "src/user/entity/User.entity";
 
 @Entity("answer")
 export default class Answer {
@@ -12,8 +13,12 @@ export default class Answer {
   @ManyToOne(() => Question, (question) => question.answers)
   question: Question;
 
-  constructor(article: string, question: Question) {
+  @ManyToOne(() => User, (user) => user.answers)
+  answerer: User;
+
+  constructor(article: string, question: Question, answerer: User) {
     this.article = article;
     this.question = question;
+    this.answerer = answerer;
   }
 }

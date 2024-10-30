@@ -33,7 +33,8 @@ class QuestionController {
   async questionAdd(req: Request, res: Response, next: Function) {
     try {
       const { title, article } = req.body.questionData;
-      const addingQuestionDTO = new AddingQuestionDTO(title, article);
+      const { userId } = req.body;
+      const addingQuestionDTO = new AddingQuestionDTO(title, article, userId);
       const newQuestionId = await this.questionService.addQuestion(addingQuestionDTO);
 
       res.status(200).send({ questionId: newQuestionId });
@@ -45,8 +46,9 @@ class QuestionController {
   async answerAdd(req: Request, res: Response, next: Function) {
     try {
       const { article } = req.body.answerData;
+      const { userId } = req.body;
       const questionId = parseInt(req.params.questionId);
-      const addingAnswerDTO = new AddingAnswerDTO(article, questionId);
+      const addingAnswerDTO = new AddingAnswerDTO(article, questionId, userId);
       await this.questionService.addAnswer(addingAnswerDTO);
 
       res.status(200).send();

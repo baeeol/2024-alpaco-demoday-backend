@@ -17,7 +17,14 @@ class UserService {
         throw new ServiceException("client", "nickname or password is wrong");
       }
 
-      return sameNicknameUser.id;
+      const { id, name } = sameNicknameUser;
+      const feature = await this.userRepository.findFeatureById(id);
+      if (!feature) {
+        throw new ServiceException("server", "user feature does not exist");
+      }
+      const { interestPart } = feature;
+
+      return { id: id, name: name, interestPart: interestPart };
     } catch (e) {
       if (e instanceof ServiceException) {
         throw e;

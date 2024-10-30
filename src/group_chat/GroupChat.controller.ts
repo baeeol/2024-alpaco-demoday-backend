@@ -54,10 +54,12 @@ class GroupChatController {
   async messageAdd(req: Request, res: Response, next: Function) {
     try {
       const { message } = req.body.groupChatMessage;
+      const { userId } = req.body;
       const groupChatId = parseInt(req.params.groupChatId);
       const addingGroupChatMessageDTO = new AddingGroupChatMessageDTO(
         message,
-        groupChatId
+        groupChatId,
+        userId
       );
       await this.groupChatService.addMessage(addingGroupChatMessageDTO);
 

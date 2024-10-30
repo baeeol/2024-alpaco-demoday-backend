@@ -1,4 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import GroupChatMessage from "src/group_chat/entity/GroupChatMessage.entity";
+import Question from "src/question/entity/Question.entity";
+import Answer from "src/question/entity/Answer.entity";
 
 @Entity("user")
 export default class User {
@@ -22,6 +25,15 @@ export default class User {
 
   @Column("varchar", { length: 128, nullable: false })
   salt: string;
+
+  @OneToMany(() => GroupChatMessage, (groupChatMessage) => groupChatMessage.commenter)
+  messages!: GroupChatMessage[];
+
+  @OneToMany(() => Question, (question) => question.questioner)
+  questions!: Question[];
+
+  @OneToMany(() => Answer, (answer) => answer.answerer)
+  answers!: Answer[];
 
   constructor(
     nickname: string,
