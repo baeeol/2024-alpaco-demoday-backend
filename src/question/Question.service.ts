@@ -40,6 +40,7 @@ class QuestionService {
               questioner: {
                 name: questioner.name,
                 interestPart: questionerFeature.interestPart,
+                belongTo: questioner.belongTo,
               },
             };
           })
@@ -83,6 +84,7 @@ class QuestionService {
               id: answer.answerer.id,
               name: answer.answerer.name,
               interestPart: answerFeature.interestPart,
+              belongTo: answer.answerer.belongTo,
             },
             article: article,
           };

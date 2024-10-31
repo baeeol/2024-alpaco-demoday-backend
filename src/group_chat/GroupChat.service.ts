@@ -85,6 +85,7 @@ class GroupChatService {
               id: commenter.id,
               name: commenter.name,
               interestPart: commenterFeature.interestPart,
+              belongTo: commenter.belongTo,
             },
             message: message,
           };
