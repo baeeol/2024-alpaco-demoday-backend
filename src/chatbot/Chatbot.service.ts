@@ -48,7 +48,9 @@ class ChatbotService {
       return { role: "assistant", content: m };
     });
 
-    return [
+    const prompt: ChatCompletionMessageType[] = [];
+
+    const adjustmentPrompt: ChatCompletionMessageType[] = [
       {
         role: "system",
         content: `당신은 "${userFeature?.interestPart}"에 대해 아주 전문적인 지식을 가지고 있는 "알렉스"입니다.`,
@@ -82,12 +84,20 @@ class ChatbotService {
         role: "system",
         content: "Let's think step by step",
       },
-      ...historyMessages,
-      {
-        role: "user",
-        content: `제 정보를 참고하여 다음 질문에 대답하여 주십시오. ${message}`,
-      },
     ];
+    prompt.push(...adjustmentPrompt);
+
+    // if (historyMessages.length) {
+    //   prompt.push(...[historyMessages[historyMessages.length - 1]]);
+    // }
+
+    prompt.push({
+      role: "user",
+      content: `추가적인 정보를 제공받기 보다는 앞서 말했던 제 정보를 참고하여 다음 질문에 대답하여 주십시오. ${message}`,
+    });
+
+    console.log(prompt);
+    return prompt;
   }
 }
 
