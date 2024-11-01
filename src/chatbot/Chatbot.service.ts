@@ -93,7 +93,7 @@ class ChatbotService {
 
     prompt.push({
       role: "user",
-      content: `추가적인 정보를 제공받기 보다는 앞서 말했던 제 정보를 참고하여 다음 질문에 대답하여 주십시오. ${message}`,
+      content: `추가적인 정보를 제공받기 보다는 앞서 말했던 제 정보를 참고하여 다음 질문에 현실적이고 엄격하게 대답하여 주십시오. ${message}`,
     });
 
     console.log(prompt);
