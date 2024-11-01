@@ -4,11 +4,20 @@ import ServiceException from "@exception/Service.exception";
 import dotenv from "dotenv";
 import UserRepository from "src/user/User.repository";
 import UserFeature from "src/user/entity/UserFeature.entity";
+import HanyangMajorAptitudeResult, {
+  HANYNAG_MAJOR_APTITUDE_AREA,
+} from "src/user/entity/HanyangMajorAptitudeResult.entity";
 dotenv.config();
 
 interface ChatCompletionMessageType {
   role: "assistant" | "system" | "user";
   content: string;
+}
+
+interface tendencyByHanyangMajorAptitude {
+  suitableAreas: HANYNAG_MAJOR_APTITUDE_AREA[] | null;
+  unsuitableAreas: HANYNAG_MAJOR_APTITUDE_AREA[] | null;
+  majorArea: HANYNAG_MAJOR_APTITUDE_AREA | null;
 }
 
 class ChatbotService {
@@ -18,13 +27,33 @@ class ChatbotService {
   async respondMessage(chatbotRequestDTO: ChatbotRequestDTO) {
     try {
       const { message, history, userId } = chatbotRequestDTO;
+
       const userFeature = await this.userRepository.findFeatureById(userId);
       if (!userFeature) {
         throw new ServiceException("server", "userFeature does not exist");
       }
+      const hanyangMajorAptitudeResult =
+        await this.userRepository.findHanyangMajorAptitudeResultByUserId(userId);
+      const { A, B, C, D, E, F } =
+        hanyangMajorAptitudeResult as HanyangMajorAptitudeResult;
+      const tendencyByHanyangMajorAptitude: tendencyByHanyangMajorAptitude = A
+        ? this.getTendencyByHanyangMajorAptitude({
+            A: A,
+            B: B as number,
+            C: C as number,
+            D: D as number,
+            E: E as number,
+            F: F as number,
+          })
+        : { suitableAreas: null, unsuitableAreas: null, majorArea: null };
 
       const chatCompletion = await this.openai.chat.completions.create({
-        messages: this.createPrompt(message, userFeature, history),
+        messages: this.createPrompt(
+          message,
+          userFeature,
+          tendencyByHanyangMajorAptitude,
+          history
+        ),
         model: "gpt-3.5-turbo",
       });
       const response = chatCompletion.choices[0].message.content;
@@ -42,6 +71,7 @@ class ChatbotService {
   private createPrompt(
     message: string,
     userFeature: UserFeature,
+    tendencyByHanyangMajorAptitude: tendencyByHanyangMajorAptitude,
     history: string[]
   ): ChatCompletionMessageType[] {
     const historyMessages: ChatCompletionMessageType[] = history.map((m) => {
@@ -53,51 +83,180 @@ class ChatbotService {
     const adjustmentPrompt: ChatCompletionMessageType[] = [
       {
         role: "system",
-        content: `당신은 "${userFeature?.interestPart}"에 대해 아주 전문적인 지식을 가지고 있는 "알렉스"입니다.`,
+        content: `You are the world's best professional in "${userFeature?.interestPart}`,
       },
       {
         role: "system",
-        content: `저는 MBTI가 ${userFeature?.MBTI}이고 ${userFeature?.strength}을 잘하며 좋아하는 건 ${userFeature?.favorite}입니다.`,
+        content: `and are also very skilled at explaining difficult concepts in simple terms.`,
       },
       {
         role: "system",
-        content: `저는 ${userFeature?.interestPart}에 대해 흥미가 있으며 관련 직종에 관심이 있습니다.`,
+        content: `You will be my career coach and need to answer realistically and strictly.`,
       },
       {
         role: "system",
-        content: `저를 한문장으로 표현하자면 "${userFeature?.sentenceOfoneself}"입니다.`,
+        content: `To give you some information about me, my MBTI is ${userFeature?.MBTI}, my strength is ${userFeature?.strength}, and my favorite thing to do is ${userFeature?.favorite}, and my favorite thing to do is ${userFeature?.favorite}.`,
+      },
+      {
+        role: "system",
+        content: `I am interested in ${userFeature?.interestPart} and related occupations.`,
+      },
+      {
+        role: "system",
+        content: `If I were to describe myself in one sentence, it would be "${userFeature?.sentenceOfoneself}".`,
+      },
+      {
+        role: "system",
+        content: `Please respond in Korean and use """honorific expressions""" in """Korean""".`,
       },
       {
         role: "system",
         content:
-          "앞으로 제가 질문할 때 저의 정보를 참고하며 반드시 존댓말로 대답해주세요.",
+          "You are the best in this field and have the best explanation tactics for each MBTI",
       },
       {
         role: "system",
-        content: `당신은 ${userFeature?.interestPart}에 대해 아주 많은 지식을 가지고 있으니 분명 저에게 꼭 맞는 대답을 해줄 수 있을겁니다.`,
+        content:
+          "Let's proceed step by step to ensure you can provide me with the best answers.",
       },
       {
         role: "system",
-        content: `당신은 할 수 있습니다. 꼭 잘해낼겁니다.`,
-      },
-      {
-        role: "system",
-        content: "Let's think step by step",
+        content: "I emphasize once more that your answer should be written in Korean.",
       },
     ];
     prompt.push(...adjustmentPrompt);
 
-    // if (historyMessages.length) {
-    //   prompt.push(...[historyMessages[historyMessages.length - 1]]);
-    // }
+    const EXAMINATION_RESULTS = {
+      A: {
+        title: "Engineering, technical inclinations",
+        description: [
+          "The attitude of honing your expertise, including mastering skills",
+          "Adapting attitudes toward new materials and technologies",
+          "An attitude of being efficient with machines (tools) and resources",
+        ],
+      },
+      B: {
+        title: "Nature, scientific inclinations",
+        description: [
+          "The scientific attitude to analyze and experiment",
+          "The attitude of curiosity and willingness to ask questions",
+          "Problem-solving, exploratory attitude",
+        ],
+      },
+      C: {
+        title: "Engineering, technical inclinations",
+        description: [
+          "Favorable attitudes toward humans, including history and culture",
+          "The attitude of organizing your thoughts and expressing them in writing",
+          "The attitude that resonates with people",
+        ],
+      },
+      D: {
+        title: "Arts, creative tendencies",
+        description: [
+          "The attitude that expresses your thoughts to others in a unique way",
+          "The attitude to spot trends and reinvent them",
+          "The attitude of empathy and sympathy",
+        ],
+      },
+      E: {
+        title: "Social sciences, global orientation",
+        description: [
+          "The attitude of taking leadership and getting along with others",
+          "The attitude of empathizing with and solving the problems of society and others",
+          "The attitude of being interested in and engaged with the structures and issues of society",
+        ],
+      },
+      F: {
+        title: "Economic, efficiency-oriented",
+        description: [
+          "A streamlined, results-oriented attitude toward work",
+          "The Attitude to anticipate and respond to the future",
+          "The attitude of meticulously planning and calculating for profit",
+        ],
+      },
+    };
+    let hanyangMajorAptitudePrompt: ChatCompletionMessageType[] = [];
+    const { suitableAreas, unsuitableAreas, majorArea } = tendencyByHanyangMajorAptitude;
+    if (suitableAreas) {
+      suitableAreas.map((area) => {
+        const attitude = EXAMINATION_RESULTS[area].description;
+        hanyangMajorAptitudePrompt.push({
+          role: "system",
+          content: `I have the right disposition for ${attitude[0]}, ${attitude[1]}, and ${attitude[2]}.`,
+        });
+      });
+    }
+    if (unsuitableAreas) {
+      unsuitableAreas.map((area) => {
+        const attitude = EXAMINATION_RESULTS[area].description;
+        hanyangMajorAptitudePrompt.push({
+          role: "system",
+          content: `I have ${attitude[0]}, ${attitude[1]}, and ${attitude[2]} that doesn't work for me.`,
+        });
+      });
+    }
+    if (majorArea) {
+      const attitude = EXAMINATION_RESULTS[majorArea].description;
+      hanyangMajorAptitudePrompt.push({
+        role: "system",
+        content: `For me, having an ${attitude[0]}, a ${attitude[1]}, and ${attitude[2]} works best.`,
+      });
+    }
+    prompt.push(...hanyangMajorAptitudePrompt);
 
     prompt.push({
       role: "user",
-      content: `추가적인 정보를 제공받기 보다는 앞서 말했던 제 정보를 참고하여 다음 질문에 현실적이고 엄격하게 대답하여 주십시오. ${message}`,
+      content: `${message}`,
     });
 
     console.log(prompt);
     return prompt;
+  }
+
+  private getTendencyByHanyangMajorAptitude(result: {
+    A: number;
+    B: number;
+    C: number;
+    D: number;
+    E: number;
+    F: number;
+  }): tendencyByHanyangMajorAptitude {
+    let tendency: tendencyByHanyangMajorAptitude = {
+      suitableAreas: [],
+      unsuitableAreas: [],
+      majorArea: null,
+    };
+
+    const areaCountList = [
+      { type: "A", count: result.A },
+      { type: "B", count: result.B },
+      { type: "C", count: result.C },
+      { type: "D", count: result.D },
+      { type: "E", count: result.E },
+      { type: "F", count: result.F },
+    ];
+
+    areaCountList.forEach((areaCount) => {
+      if (areaCount.count >= 7) {
+        tendency.suitableAreas?.push(areaCount.type as HANYNAG_MAJOR_APTITUDE_AREA);
+      } else if (areaCount.count <= 3) {
+        tendency.unsuitableAreas?.push(areaCount.type as HANYNAG_MAJOR_APTITUDE_AREA);
+      }
+    });
+
+    const sortedAreaCountList = areaCountList.sort((a, b) => {
+      return a.count - b.count;
+    });
+    tendency.majorArea = sortedAreaCountList[0].type as HANYNAG_MAJOR_APTITUDE_AREA;
+
+    if (!tendency.suitableAreas?.length) {
+      tendency.suitableAreas = null;
+    }
+    if (!tendency.unsuitableAreas?.length) {
+      tendency.unsuitableAreas = null;
+    }
+    return tendency;
   }
 }
 

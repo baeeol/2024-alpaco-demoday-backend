@@ -10,6 +10,8 @@ export type HANYNAG_MAJOR_APTITUDE_RESULT_TYPE = {
   F: number;
 };
 
+export type HANYNAG_MAJOR_APTITUDE_AREA = "A" | "B" | "C" | "D" | "E" | "F";
+
 @Entity("hanyang_major_aptitude_result")
 export default class HanyangMajorAptitudeResult {
   @PrimaryGeneratedColumn("increment")
