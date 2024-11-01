@@ -4,6 +4,7 @@ import { LoginDTO, RegisterDTO } from "./dto";
 import User from "./entity/User.entity";
 import bcrypt from "bcrypt";
 import UserFeature from "./entity/UserFeature.entity";
+import { HANYNAG_MAJOR_APTITUDE_RESULT_TYPE } from "./entity/HanyangMajorAptitudeResult.entity";
 
 class UserService {
   private userRepository = new UserRepository();
@@ -67,7 +68,44 @@ class UserService {
         newUser
       );
 
-      const a = await this.userRepository.createUser(newUser, newUserFeature);
+      await this.userRepository.createUser(newUser, newUserFeature);
+    } catch (e) {
+      if (e instanceof ServiceException) {
+        throw e;
+      }
+
+      throw new ServiceException("server", `${e}`);
+    }
+  }
+
+  async findHanyangMajorAptitudeResult(userId: number) {
+    try {
+      const result = await this.userRepository.findHanyangMajorAptitudeResultByUserId(
+        userId
+      );
+      return {
+        A: result?.A,
+        B: result?.B,
+        C: result?.C,
+        D: result?.D,
+        E: result?.E,
+        F: result?.F,
+      };
+    } catch (e) {
+      if (e instanceof ServiceException) {
+        throw e;
+      }
+
+      throw new ServiceException("server", `${e}`);
+    }
+  }
+
+  async updateHanyangMajorAptitudeResult(
+    userId: number,
+    result: HANYNAG_MAJOR_APTITUDE_RESULT_TYPE
+  ) {
+    try {
+      await this.userRepository.updateHanyangMajorAptitudeResultByUserId(userId, result);
     } catch (e) {
       if (e instanceof ServiceException) {
         throw e;

@@ -44,6 +44,30 @@ class UserController {
       next(e);
     }
   }
+
+  async hanyangMajorAptitudeResultFind(req: Request, res: Response, next: Function) {
+    try {
+      const { userId } = req.body;
+
+      const result = await this.userService.findHanyangMajorAptitudeResult(userId);
+
+      res.status(200).send({ result: result });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async hanyangMajorAptitudeResultUpdate(req: Request, res: Response, next: Function) {
+    try {
+      const { userId, result } = req.body;
+
+      await this.userService.updateHanyangMajorAptitudeResult(userId, result);
+
+      res.status(200).send();
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 export default UserController;
